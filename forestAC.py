@@ -44,15 +44,19 @@ class Grid:
         [(-1, 0), (0, -2), (0, -1), (0, 2), (0, 1), (2, 0), (1, 0)],
     ]
 
-    def __init__(self):
+    def __init__(self, parameters):
         print("Creating a grid of dimensions " + str(__gridDim__))
+        self._density1 = parameters.__density1__
+        self._density2 = parameters.__density2__
+        self._wind = parameters.__wind__
+
         self._grid = np.zeros(__gridDim__, dtype="int8")
         for x in range(__gridDim__[0]):
             for y in range(__gridDim__[1]):
                 n = random.randint(1, 101)
-                if n < __density1__ * 100:
+                if n < self._density1 * 100:
                     self._grid[x, y] = 1
-                elif n < (__density1__ + __density2__) * 100:
+                elif n < (self._density1 + self._density2) * 100:
                     self._grid[x, y] = 2
 
     def indiceVoisins(self, x, y):
@@ -68,7 +72,7 @@ class Grid:
     def indiceVoisinsWind(self, x, y):
         return [
             (dx + x, dy + y)
-            for (dx, dy) in self._indexVoisinsWind[__wind__.value]
+            for (dx, dy) in self._indexVoisinsWind[self._wind.value]
             if dx + x >= 0
             and dx + x < __gridDim__[0]
             and dy + y >= 0
@@ -93,6 +97,7 @@ class Scene:
         def randomize(self):
             rnd = random.Random()
             randomWind = rnd.randint(0, 3)
+            print(randomWind)
             self.__wind__ = Wind(randomWind)
             randomFires = rnd.randint(1, 10)
             self.__nbInitialFires__ = randomFires
@@ -112,10 +117,10 @@ class Scene:
             (__screenSize__[0], __screenSize__[1] + 110)
         )
         self._font = pygame.font.SysFont("Monospace", 18, bold=True)
-        self._grid = Grid()
         self._parameters = self.Parameters()
         if random:
             self._parameters.randomize()
+        self._grid = Grid(self._parameters)
 
     def drawMe(self):
         if self._grid._grid is None:
