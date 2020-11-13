@@ -16,7 +16,7 @@ class Wind(Enum):
     East = 3
 
 
-__screenSize__ = (900, 900)  # (1280,1280)
+__screenSize__ = (600, 600)  # (900,900) (1280,1280)
 __cellSize__ = 10
 __gridDim__ = tuple(map(lambda x: int(x / __cellSize__), __screenSize__))
 __colors__ = [(255, 255, 255), (26, 174, 70), (7, 70, 22), (194, 46, 28), (107, 30, 30)]
@@ -27,7 +27,13 @@ __refreshTime__ = 10000
 __density1__ = 0.4
 __density2__ = 0.1
 __nbInitialFires__ = 3
-__wind__ = Wind.West  # South  = 0, West = 1, North = 2, East = 3
+__wind__ = Wind.West  # South, West, North, East
+
+__resistanceTree1__ = 1
+__resistanceTree2__ = 1.3
+__transmissibilityFire1__ = 0.3
+__transmissibilityFire2__ = 0.5
+__ratioDistance__ = 1
 
 
 def getColorCell(n):
@@ -38,10 +44,10 @@ class Grid:
     _grid = None
     _indexVoisins = [(-1, 0), (0, -1), (0, 1), (1, 0)]
     _indexVoisinsWind = [
-        [(-2, 0), (-1, 0), (0, -1), (0, 2), (0, 1), (2, 0), (1, 0)],
-        [(-2, 0), (-1, 0), (0, -1), (0, -2), (0, 2), (0, 1), (1, 0)],
-        [(-2, 0), (-1, 0), (0, -2), (0, -1), (0, 1), (2, 0), (1, 0)],
-        [(-1, 0), (0, -2), (0, -1), (0, 2), (0, 1), (2, 0), (1, 0)],
+        [(-1, 0), (0, -1), (0, 1), (1, 0), (-2, 0), (0, 2), (2, 0)],
+        [(-1, 0), (0, -1), (0, 1), (1, 0), (-2, 0), (0, -2), (0, 2)],
+        [(-1, 0), (0, -1), (0, 1), (1, 0), (-2, 0), (0, -2), (2, 0)],
+        [(-1, 0), (0, -1), (0, 1), (1, 0), (0, -2), (0, 2), (2, 0)],
     ]
 
     def __init__(self, parameters):
@@ -162,22 +168,41 @@ class Scene:
             if self._grid._grid[x, y] == 1:
                 self._grid._grid[x, y] = 3
                 nb_fire -= 1
+        
+    def _calculate_probability(self,x,y):
+        nbMaxVoisin = 7
+        resistanceTree = __resistanceTree1__
+        if self._grid._grid[x, y] == 2:
+            resistanceTree = __resistanceTree2__
+        voisins = self._grid.voisins(x, y)
+
+        [nbFire1, nbFire2, nbFireDistance1, nbFireDistance2] = [0,0,0,0]
+        for tree in voisins:
+            if tree == 3:
+                nbFire1 += 1
+            if tree == 4:
+                nbFire2 += 1
+
+        res = (nbFire1 * __transmissibilityFire1__ + nbFire2 * __transmissibilityFire2__)/resistanceTree
+        res = min(res,1)
+        return res
+        
 
     def update(self):
         for x in range(__gridDim__[0]):
             for y in range(__gridDim__[1]):
-                nb_fire = 0
+                proba = 0
+                # Count how many neighbour trees are on fire
                 if self._grid._grid[x, y] == 1 or self._grid._grid[x, y] == 2:
-                    voisins = self._grid.voisins(x, y)
-                    for tree in voisins:
-                        if tree == 3 or tree == 4:
-                            nb_fire += 1
+                    proba = self._calculate_probability(x,y)
 
-                if self._grid._grid[x, y] == 1 and nb_fire >= 1:
-                    self._grid._grid[x, y] = 5
-                if self._grid._grid[x, y] == 2 and nb_fire >= 2:
+                # If conditions are satisfied, prepare the tree to be on fire
+                index = random.randint(1,100)
+                if index <= proba*100 :
                     self._grid._grid[x, y] = 5
 
+
+        # Update the value of each tree, to put them on fire or stop the fire
         for x in range(__gridDim__[0]):
             for y in range(__gridDim__[1]):
                 if self._grid._grid[x, y] == 4:
