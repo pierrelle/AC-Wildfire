@@ -6,7 +6,10 @@ from pygame.event import Event
 import numpy as np
 from enum import Enum
 
-# TODO: Ajouter proba
+# TODO: Voir si on ajoute la distance dans les proba, si oui comment
+# TODO: Voir si on fait des compositions de terrains différentes, si oui lesquelles
+# TODO: Voir si on fait des graphes pour visualiser la percolation en fonction des valeurs
+# TODO: Cleaner ce bordel de code, voir quelle norme on prend 
 
 
 class Wind(Enum):
@@ -33,7 +36,6 @@ __resistanceTree1__ = 1
 __resistanceTree2__ = 1.3
 __transmissibilityFire1__ = 0.3
 __transmissibilityFire2__ = 0.5
-__ratioDistance__ = 1
 
 
 def getColorCell(n):
@@ -170,7 +172,6 @@ class Scene:
                 nb_fire -= 1
         
     def _calculate_probability(self,x,y):
-        nbMaxVoisin = 7
         resistanceTree = __resistanceTree1__
         if self._grid._grid[x, y] == 2:
             resistanceTree = __resistanceTree2__
