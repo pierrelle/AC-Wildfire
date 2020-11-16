@@ -6,9 +6,9 @@ from pygame.event import Event
 import numpy as np
 from enum import Enum
 
-# TODO: Voir si on ajoute la distance dans les proba, si oui comment
-# TODO: Voir si on fait des compositions de terrains différentes, si oui lesquelles
-# TODO: Voir si on fait des graphes pour visualiser la percolation en fonction des valeurs
+
+# TODO: Mettre le parefeu en parametre visible sur la fenetre
+# TODO: cela peut etre interessant de faire deux fois de suite la meme simulation mais sans/avec parefeu
 # TODO: Cleaner ce bordel de code, voir quelle norme on prend 
 
 
@@ -25,7 +25,7 @@ __gridDim__ = tuple(map(lambda x: int(x / __cellSize__), __screenSize__))
 __colors__ = [(255, 255, 255), (26, 174, 70), (7, 70, 22), (194, 46, 28), (107, 30, 30)]
 __refreshTime__ = 10000
 
-
+__firebreak__ = True
 # The sum of densities must be included between 0 and 1
 __density1__ = 0.4
 __density2__ = 0.1
@@ -67,6 +67,15 @@ class Grid:
                 elif n < (self._density1 + self._density2) * 100:
                     self._grid[x, y] = 2
 
+        if parameters.__firebreak__ :
+            for x in range (0, __gridDim__[0], (__gridDim__[0]//4)): 
+                for y in range (__gridDim__[1]): 
+                    self._grid[x,y] = 0
+            for y in range (0, __gridDim__[1], (__gridDim__[1]//4)): 
+                for x in range (__gridDim__[0]): 
+                    self._grid[x,y] = 0
+
+
     def indiceVoisins(self, x, y):
         return [
             (dx + x, dy + y)
@@ -97,6 +106,7 @@ class Grid:
 class Scene:
     class Parameters:
         def __init__(self):
+            self.__firebreak__ = __firebreak__
             self.__density1__ = __density1__
             self.__density2__ = __density2__
             self.__nbInitialFires__ = __nbInitialFires__
@@ -113,6 +123,7 @@ class Scene:
             self.__density1__ = randomTree
             randomTree2 = rnd.uniform(0, 0.2)
             self.__density2__ = randomTree2
+            self.__firebreak__ = rnd.choice([True, False])
 
     _mouseCoords = (0, 0)
     _grid = None
@@ -153,7 +164,8 @@ class Scene:
         fireText = f"Initial fires : {self._parameters.__nbInitialFires__}"
         density1Text = f"Density light Tree : {round(self._parameters.__density1__, 2)}"
         density2Text = f"Density heavy Tree : {round(self._parameters.__density2__, 2)}"
-        labels = [windText, fireText, density1Text, density2Text]
+        firebreakText = f"Firebreak : {self._parameters.__firebreak__}"
+        labels = [windText, fireText, density1Text, density2Text, firebreakText]
         for lab in labels:
             rect = Rect(10, __screenSize__[1] + topPadding, 200, 100)
             topPadding += 25
