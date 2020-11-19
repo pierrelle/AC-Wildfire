@@ -13,9 +13,6 @@ from src.Parameters import Parameters
 from src.Scene import Scene
 from src.Wind import Wind
 
-# TODO: cela peut etre interessant de faire deux fois de suite la meme simulation mais sans/avec parefeu
-# TODO: Cleaner ce bordel de code, voir quelle norme on prend
-
 CELL_SIZE = 10
 SCREEN_SIZE = (600, 600)  # (900,900) (1280,1280)
 GRID_DIM = tuple(map(lambda x: int(x / CELL_SIZE), SCREEN_SIZE))
