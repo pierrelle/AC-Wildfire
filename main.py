@@ -1,5 +1,3 @@
-import math
-import random
 import sys
 
 import numpy as np
@@ -42,7 +40,7 @@ def main():
                 SCREEN_SIZE, CELL_SIZE, COLORS, GRID_DIM, parameters, random=True
             )
             scene.initiate_fire()
-            timer = pygame.time.set_timer(32774, REFRESH_TIME)
+            pygame.time.set_timer(32774, REFRESH_TIME)
             refresh = False
         clock = pygame.time.Clock()
         scene.draw_me()

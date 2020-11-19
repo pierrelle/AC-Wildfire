@@ -35,7 +35,7 @@ Chaque case de la grille correspond à un arbre. Pour cela elle a une valeur ent
 
 ### Probabilité qu'un arbre prenne feu 
 
-	$p = min(\frac{nb_feu_3*transmission_feu_3 + nb_feu_4*transmission_feu_4}{resistance_arbre}, 1)$
+    $$p = min(\frac{nbFeu_3 \times transmissionFeu_3 + nbFeu_4 \times transmissionFeu_4}{resistanceArbre}, 1)$$
 
 Exemple : 
   - Si un arbre léger a pour voisin 2 arbres en feu, un en petit feu, un en grand feu, il a 70% de risque de prendre feu. Un arbre lourd a 54% de risque.

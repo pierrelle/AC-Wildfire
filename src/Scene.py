@@ -1,15 +1,11 @@
-import math
 import random
-import sys
-from enum import Enum
+from typing import List, Tuple
 
 import numpy as np
 import pygame
 import pygame.draw
 from pygame import Rect
 from pygame.event import Event
-from typing import List, Tuple
-
 
 from .Grid import Grid
 from .Parameters import Parameters
