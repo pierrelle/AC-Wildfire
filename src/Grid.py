@@ -21,7 +21,6 @@ class Grid(object):
 
     def __init__(self, grid_dim: Tuple, parameters: Parameters):
         self.GRID_DIM = grid_dim
-        print("Creating a grid of dimensions " + str(self.GRID_DIM))
         self._density1 = parameters.density1
         self._density2 = parameters.density2
         self._wind = parameters.wind
