@@ -23,21 +23,30 @@ class Scene(object):
         grid_dim: Tuple,
         parameters: Parameters,
         random: bool = False,
+        display: bool = True,
     ):
         self.SCREEN_SIZE = screen_size
         self.CELL_SIZE = cell_size
         self.COLORS = colors
         self.GRID_DIM = grid_dim
-        pygame.init()
-        pygame.display.set_caption("Forest Cellular Automaton")
-        self._screen = pygame.display.set_mode(
-            (self.SCREEN_SIZE[0], self.SCREEN_SIZE[1] + 140)
-        )
-        self._font = pygame.font.SysFont("Monospace", 18, bold=True)
         self._parameters = parameters
+
+        if display:
+            pygame.init()
+            pygame.display.set_caption("Forest Cellular Automaton")
+            self._screen = pygame.display.set_mode(
+                (self.SCREEN_SIZE[0], self.SCREEN_SIZE[1] + 140)
+            )
+            self._font = pygame.font.SysFont("Monospace", 18, bold=True)
+            print("Creating a grid of dimensions " + str(self.GRID_DIM))
+
         if random:
             self._parameters.randomize()
         self._grid = Grid(self.GRID_DIM, self._parameters)
+        self.repartition = [0, 0, 0, 0, 0]
+        for x in range(self.GRID_DIM[0]):
+            for y in range(self.GRID_DIM[1]):
+                self.repartition[self._grid._grid[x, y]] += 1
 
     def draw_me(self):
         """Draw the scene"""
@@ -84,10 +93,12 @@ class Scene(object):
     def initiate_fire(self):
         """Spawn fires in the generated forest in order to start the burning."""
         nb_fire = self._parameters.nb_initial_fires
+        self.repartition[3] = nb_fire
         while nb_fire != 0:
             x = random.randint(0, self.GRID_DIM[0] - 1)
             y = random.randint(0, self.GRID_DIM[1] - 1)
             if self._grid._grid[x, y] == 1:
+                self.repartition[self._grid._grid[x, y]] -= 1
                 self._grid._grid[x, y] = 3
                 nb_fire -= 1
 
@@ -127,10 +138,10 @@ class Scene(object):
                 proba = 0
                 if self._grid._grid[x, y] == 1 or self._grid._grid[x, y] == 2:
                     proba = self._calculate_probability(x, y)
-
                 # If conditions are satisfied, prepare the tree to be on fire
                 index = random.randint(1, 100)
                 if index <= proba * 100:
+                    self.repartition[self._grid._grid[x, y]] -= 1
                     self._grid._grid[x, y] = 5
 
         # Update the value of each tree, to put them on fire or stop the fire
@@ -138,7 +149,12 @@ class Scene(object):
             for y in range(self.GRID_DIM[1]):
                 if self._grid._grid[x, y] == 4:
                     self._grid._grid[x, y] = 0
+                    self.repartition[4] -= 1
+                    self.repartition[0] += 1
                 if self._grid._grid[x, y] == 3:
                     self._grid._grid[x, y] = 4
+                    self.repartition[3] -= 1
+                    self.repartition[4] += 1
                 if self._grid._grid[x, y] == 5:
                     self._grid._grid[x, y] = 3
+                    self.repartition[3] += 1
